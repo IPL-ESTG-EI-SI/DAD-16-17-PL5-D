@@ -1,6 +1,5 @@
 'use strict';
 (function(){
-
   $(function(){
     var nameInput = $('#name');
     var gradeInput = $('#grade');
@@ -34,7 +33,5 @@
       gradeOutput.text('Empty');
       periodOutput.text('Empty');
     });
-
   });
-
 })();
