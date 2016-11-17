@@ -3,10 +3,14 @@
 	var restify = require('restify');
 	var path = require('path');
 	var database = require('./mongo2.database');
+	var security = require('./mongo4.security');
+
 
 	var url = 'mongodb://localhost:27017/dad-mongo';
 
 	var server = restify.createServer();
+
+	security.init(server);
 
 	restify.CORS.ALLOW_HEADERS.push("content-type");
 

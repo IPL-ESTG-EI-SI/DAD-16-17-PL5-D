@@ -2,6 +2,7 @@
 
 var mongodb = require('mongodb');
 var database = require('./mongo2.database');
+var security = require('./mongo4.security');
 var players = module.exports = {};
 
 function getPlayers(request, response, next){
@@ -92,20 +93,72 @@ function deletePlayer(request, response, next){
 			console.log(err);
 			next();
 		}
-		response.json({msg:'Player Deleted'});
+		response.json({msg:'Player'});
 		next();
 	});
 
-
 }
+
+function findTopTen(request, response, next){
+
+	database.db.collection('players')
+		.find({})
+		.sort({totalVictories: -1})
+		.limit(10)
+		.toArray(function(err,players){
+		if(err){
+			console.log(err);
+			next();
+		}
+
+
+		response.json(players);
+		next();
+	});
+}
+function login(request, response, next){
+	var player = request.user;
+	var id = player._id;
+	console.log(player);
+
+	var date = new Date();
+	var timestamp = date.getTime();
+	player.token = sha1(player.username+timestamp)
+	
+	database.db.collection("players").save(player,function(err, player) {
+		if(err) {
+	        console.log(err);
+	        next();
+	    } else {
+
+		    database.db.collection("players").findOne({_id:id},function(err, player) {
+		  		if(err) {
+			        console.log(err);
+			        next();
+			    } else {
+				    response.json(player);
+				    next();
+			    }
+			  });
+	    }
+    });
+
+};
+
 
 // Routes for the players
 players.init = function(server,apiBaseUri){
-	server.get(apiBaseUri+'players',getPlayers);
+	server.post(apiBaseUri+'login',
+	security.passport.authenticate('local'),
+	login);
+	server.get(apiBaseUri+'players',
+		security.passport.authenticate('bearer', { session: false }),
+		getPlayers);
 	server.get(apiBaseUri+'players/:id',getPlayer);
 	server.put(apiBaseUri+'players/:id',updatePlayer);
 	server.post(apiBaseUri+'players',createPlayer);
 	server.del(apiBaseUri+'players/:id',deletePlayer);
+	server.get(apiBaseUri+'topten',findTopTen);
 	console.log("Players routes registered");
 }
 
