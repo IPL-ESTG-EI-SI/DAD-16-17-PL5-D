@@ -1,0 +1,10 @@
+<h2>Board</h2>
+
+
+<div id="board" *ngIf="board">
+  <div *ngFor="let cell of board; let i = index"
+       class="board-cell"
+       (click)="clickHandler($event, i,cell)"
+       [ngClass]="getClassForCell(i)">
+  </div>
+</div>
